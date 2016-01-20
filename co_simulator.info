@@ -1,0 +1,4 @@
+name = Credit Simulator
+description = Credit Simulator
+core = 7.x
+package = Comfandi

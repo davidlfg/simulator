@@ -1,0 +1,147 @@
+<?php
+
+/**
+ * Implements hook_permission().
+ */
+function co_simulator_permission() {
+  return array(
+    'access simulator page' => array(
+      'title' => t('Access simulator page'),
+      'description' => t('Allow users to access simulator page'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function co_simulator_menu() {
+	$items = array();
+	$items['admin/config/comfandi/simulator'] = array(
+    'title' => t('Simulator configuration'),
+    'description' => t('general configuration of the simulator'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_general_form'),
+    'access arguments' => array('administer site configuration'),
+    //'weight' => -15,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/general'] = array(
+    'title' => t('General'),
+    'description' => t('general configuration of the simulator'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_general_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/cuota-ciclica'] = array(
+    'title' => t('Cuota cíclica'),
+    'description' => t('Cuota cíclica (Decreciente mensual por años).'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_cuota_ciclica_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/cuota-media'] = array(
+    'title' => t('Cuota media'),
+    'description' => t('Cuota media (Abono constante a capital en UVR).'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_cuota_media_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/cuota-baja'] = array(
+    'title' => t('Cuota baja'),
+    'description' => t('Cuota baja (Cuota constante en UVR).'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_cuota_baja_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 4,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/cuota-total-fija'] = array(
+    'title' => t('Cuota total fija'),
+    'description' => t('Cuota fija total en pesos.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_cuota_total_fija_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['admin/config/comfandi/simulator/amortizacion-constante-capital'] = array(
+    'title' => t('Amor cte a Capital'),
+    'description' => t('Amortización constante a capital en pesos.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_settings_amortizacion_constante_capital_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 6,
+    'file' => 'inc/co_simulator.admin.form.inc',
+  );
+  $items['simulator'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('co_simulator_calculator_form'),
+    'access arguments' => array('access simulator page'),
+    'type' => MENU_CALLBACK,
+    'file' => 'inc/co_simulator.user.form.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function co_simulator_block_info() {
+  $blocks['co_simulator_calculator_form'] = array(
+    'info' => t('Amortization Calculator form'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function co_simulator_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'co_simulator_calculator_form':
+      include_once(drupal_get_path('module','co_simulator') . '/inc/co_simulator.user.form.inc');
+      $form = drupal_get_form('co_simulator_calculator_form');
+      $block['content'] = array(
+        '#markup' => drupal_render($form),
+        '#attached' => array(
+          'css' => array(drupal_get_path('module', 'co_simulator') . '/css/co_simulator.css',),
+          'js' => array(drupal_get_path('module', 'co_simulator') . '/js/co_simulator.js',),
+        ),
+      );
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function co_simulator_theme($existing, $type, $theme, $path) {
+  return array(
+    'co_simulator_page' => array(
+      'variables' => array(
+        //'title' => NULL,
+        'table_conditional' => NULL,
+        'summary' => NULL,
+        'title_table' => NULL,
+        'table_projection' => NULL,
+      ),
+      'template' => 'co-simulator-page',
+      'path' => $path . '/templates'
+    ),
+  );
+}
